@@ -7,16 +7,16 @@ package goplay
 import (
 	"appengine"
 	"appengine/datastore"
-	"http"
+	"net/http"
 	"strings"
-	"template"
+	"text/template"
 )
 
 func init() {
 	http.HandleFunc("/", edit)
 }
 
-var editTemplate = template.Must(template.ParseFile("goplay/edit.html"))
+var editTemplate = template.Must(template.ParseFiles("goplay/edit.html"))
 
 func edit(w http.ResponseWriter, r *http.Request) {
 	snip := &Snippet{Body: []byte(hello)}

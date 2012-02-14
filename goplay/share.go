@@ -11,8 +11,8 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"fmt"
-	"http"
 	"io"
+	"net/http"
 )
 
 const salt = "[replace this with something unique]"
@@ -25,7 +25,7 @@ func (s *Snippet) Id() string {
 	h := sha1.New()
 	io.WriteString(h, salt)
 	h.Write(s.Body)
-	sum := h.Sum()
+	sum := h.Sum(nil)
 	b := make([]byte, base64.URLEncoding.EncodedLen(len(sum)))
 	base64.URLEncoding.Encode(b, sum)
 	return string(b)[:10]
