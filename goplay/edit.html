@@ -9,7 +9,13 @@
 		<script src="/static/playground.js"></script>
 		<script>
 		$(document).ready(function() {
-			playground("#code", "#output", "#run", "#share", "#shareURL");
+			playground({
+				"codeEl":     "#code",
+				"outputEl":   "#output",
+				"runEl":      "#run",
+				"shareEl":    "#share",
+				"shareURLEl": "#shareURL"
+			});
 		});
 		</script>
 	</head>

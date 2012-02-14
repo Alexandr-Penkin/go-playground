@@ -1,5 +1,13 @@
-function playground(codeEl, outputEl, runEl, shareEl, shareURLEl) {
-	var code = $(codeEl);
+// opts is an object with these keys
+// 	codeEl - code editor element 
+// 	outputEl - program output element
+// 	runEl - run button element
+// 	shareEl - share button element (optional)
+// 	shareURLEl - share URL text input element (optional)
+// 	preCompile - callback to mutate request data before compiling
+// 	postCompile - callback to read response data after compiling
+function playground(opts) {
+	var code = $(opts['codeEl']);
 	var editor = CodeMirror.fromTextArea(
 		code[0],
 		{
@@ -17,7 +25,7 @@ function playground(codeEl, outputEl, runEl, shareEl, shareURLEl) {
 			}
 		}
 	);
-	var output = $(outputEl);
+	var output = $(opts['outputEl']);
 
 	function clearErrors() {
 		var lines = editor.lineCount();
@@ -42,9 +50,14 @@ function playground(codeEl, outputEl, runEl, shareEl, shareURLEl) {
 		);
 		seq++;
 		var cur = seq;
+		var data = {
+			"body": editor.getValue()
+		};
+		if (opts['preCompile']) {
+			opts['preCompile'](data);
+		}
 		$.ajax("/compile", {
-			processData: false,
-			data: editor.getValue(),
+			data: data,
 			type: "POST",
 			dataType: "json",
 			success: function(data) {
@@ -53,22 +66,28 @@ function playground(codeEl, outputEl, runEl, shareEl, shareURLEl) {
 				}
 				pre = $("<pre/>");
 				output.empty().append(pre);
+				if (opts['postCompile']) {
+					opts['postCompile'](data);
+				}
+				if (!data) {
+					return;
+				}
 				if (data.compile_errors != "") {
 					pre.text(data.compile_errors);
 					output.addClass("error");
 					highlightErrors(data.compile_errors);
-				} else {
-					var out = ""+data.output;
-					if (out.indexOf("IMAGE:") == 0) {
-						var img = $("<img/>");
-						var url = "data:image/png;base64,";
-						url += out.substr(6)
-						img.attr("src", url);
-						output.empty().append(img);
-					} else {
-						pre.text(data.output);
-					}
+					return;
 				}
+				var out = ""+data.output;
+				if (out.indexOf("IMAGE:") == 0) {
+					var img = $("<img/>");
+					var url = "data:image/png;base64,";
+					url += out.substr(6)
+					img.attr("src", url);
+					output.empty().append(img);
+					return;
+				}
+				pre.text(out);
 			},
 			error: function() {
 				output.addClass("error").text(
@@ -77,9 +96,9 @@ function playground(codeEl, outputEl, runEl, shareEl, shareURLEl) {
 			}
 		});
 	}
-	$(runEl).click(run);
+	$(opts['runEl']).click(run);
 
-	if (shareEl == null || shareURLEl == null) {
+	if (opts['shareEl'] == null || opts['shareURLEl'] == null) {
 		return editor;
 	}
 
@@ -87,9 +106,9 @@ function playground(codeEl, outputEl, runEl, shareEl, shareURLEl) {
 		return (""+href).split("/").slice(0, 3).join("/");
 	}
 
-	var shareURL = $(shareURLEl).hide();
+	var shareURL = $(opts['shareURLEl']).hide();
 	var sharing = false;
-	$(shareEl).click(function() {
+	$(opts['shareEl']).click(function() {
 		if (sharing) return;
 		sharing = true;
 		$.ajax("/share", {
