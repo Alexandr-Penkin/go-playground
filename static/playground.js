@@ -1,3 +1,7 @@
+// Copyright 2012 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 // opts is an object with these keys
 // 	codeEl - code editor element 
 // 	outputEl - program output element
@@ -6,40 +10,103 @@
 // 	shareURLEl - share URL text input element (optional)
 // 	preCompile - callback to mutate request data before compiling
 // 	postCompile - callback to read response data after compiling
+//      simple - use plain textarea instead of CodeMirror.
 function playground(opts) {
+	var simple = opts['simple'];
 	var code = $(opts['codeEl']);
-	var editor = CodeMirror.fromTextArea(
-		code[0],
-		{
-			lineNumbers: true,
-			indentUnit: 8,
-			indentWithTabs: true,
-			onKeyEvent: function(editor, e) {
-				if (e.keyCode == 13 && e.shiftKey) {
-					if (e.type == "keydown") {
-						run();
-					}
-					e.stop();
-					return true;
-				}
+	var editor;
+
+	// autoindent helpers for simple mode.
+	function insertTabs(n) {
+		// find the selection start and end
+		var start = code[0].selectionStart;
+		var end   = code[0].selectionEnd;
+		// split the textarea content into two, and insert n tabs
+		var v = code[0].value;
+		var u = v.substr(0, start);
+		for (var i=0; i<n; i++) {
+			u += "\t";
+		}
+		u += v.substr(end);
+		// set revised content
+		code[0].value = u;
+		// reset caret position after inserted tabs
+		code[0].selectionStart = start+n;
+		code[0].selectionEnd = start+n;
+	}
+	function autoindent(el) {
+		var curpos = el.selectionStart;
+		var tabs = 0;
+		while (curpos > 0) {
+			curpos--;
+			if (el.value[curpos] == "\t") {
+				tabs++;
+			} else if (tabs > 0 || el.value[curpos] == "\n") {
+				break;
 			}
 		}
-	);
+		setTimeout(function() {
+			insertTabs(tabs, 1);
+		}, 1);
+	}
+
+	function keyHandler(e) {
+		if (simple && e.keyCode == 9) { // tab
+			insertTabs(1);
+			e.preventDefault();
+			return false;
+		}
+		if (e.keyCode == 13) { // enter
+			if (e.shiftKey) { // +shift
+				run();
+				e.preventDefault();
+				return false;
+			} else if (simple) {
+				autoindent(e.target);
+			}
+		}
+		return true;
+	}
+	if (simple) {
+		code.unbind('keydown').bind('keydown', keyHandler);
+	} else {
+		editor = CodeMirror.fromTextArea(
+			code[0],
+			{
+				lineNumbers: true,
+				indentUnit: 8,
+				indentWithTabs: true,
+				onKeyEvent: function(editor, e) { keyHandler(e); }
+			}
+		);
+	}
 	var output = $(opts['outputEl']);
 
 	function clearErrors() {
+		if (!editor) {
+			return;
+		}
 		var lines = editor.lineCount();
 		for (var i = 0; i < lines; i++) {
 			editor.setLineClass(i, null);
 		}
 	}
 	function highlightErrors(text) {
+		if (!editor) {
+			return;
+		}
 		var errorRe = /[a-z]+\.go:([0-9]+): /g;
 		var result;
 		while ((result = errorRe.exec(text)) != null) {
 			var line = result[1]*1-1;
 			editor.setLineClass(line, "errLine")
 		}
+	}
+	function body() {
+		if (editor) {
+			return editor.getValue();
+		}
+		return $(opts['codeEl']).val();
 	}
 
 	var seq = 0;
@@ -50,9 +117,7 @@ function playground(opts) {
 		);
 		seq++;
 		var cur = seq;
-		var data = {
-			"body": editor.getValue()
-		};
+		var data = {"body": body()};
 		if (opts['preCompile']) {
 			opts['preCompile'](data);
 		}
@@ -113,7 +178,7 @@ function playground(opts) {
 		sharing = true;
 		$.ajax("/share", {
 			processData: false,
-			data: editor.getValue(),
+			data: body(),
 			type: "POST",
 			complete: function(xhr) {
 				sharing = false;
