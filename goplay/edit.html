@@ -14,7 +14,8 @@
 				"outputEl":   "#output",
 				"runEl":      "#run",
 				"shareEl":    "#share",
-				"shareURLEl": "#shareURL"
+				"shareURLEl": "#shareURL",
+				"simple":     {{.Simple}}
 			});
 		});
 		</script>
@@ -26,7 +27,13 @@
 			<input type="button" value="Share" id="share">
 			<input type="text" id="shareURL">
 		</div>
-		<textarea id="code" name="code">{{printf "%s" .Body |html}}</textarea>
+		{{if .Simple}}{{else}}
+		<div class="switch">
+			Editor not working?<br/>
+			Switch to <a href="?simple=1">simple mode</a>.
+		</div>
+		{{end}}
+		<textarea id="code" name="code" {{if .Simple}}class="simple"{{end}}>{{printf "%s" .Snippet.Body |html}}</textarea>
 		<div id="output"></div>
 	</body>
 </html>

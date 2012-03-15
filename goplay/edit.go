@@ -18,6 +18,11 @@ func init() {
 
 var editTemplate = template.Must(template.ParseFiles("goplay/edit.html"))
 
+type editData struct {
+	Snippet *Snippet
+	Simple  bool
+}
+
 func edit(w http.ResponseWriter, r *http.Request) {
 	snip := &Snippet{Body: []byte(hello)}
 	if strings.HasPrefix(r.URL.Path, "/p/") {
@@ -33,7 +38,8 @@ func edit(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	editTemplate.Execute(w, snip)
+	simple := r.FormValue("simple") != ""
+	editTemplate.Execute(w, &editData{snip, simple})
 }
 
 const hello = `package main
