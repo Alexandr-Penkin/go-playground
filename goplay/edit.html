@@ -13,6 +13,7 @@
 				"codeEl":     "#code",
 				"outputEl":   "#output",
 				"runEl":      "#run",
+				"fmtEl":      "#fmt",
 				"shareEl":    "#share",
 				"shareURLEl": "#shareURL",
 				"simple":     {{.Simple}}
@@ -24,6 +25,7 @@
 		<div id="head">Go Playground</div>
 		<div id="controls">
 			<input type="button" value="Run" id="run">
+			<input type="button" value="Format" id="fmt">
 			<input type="button" value="Share" id="share">
 			<input type="text" id="shareURL">
 		</div>
@@ -33,7 +35,7 @@
 			Switch to <a href="?simple=1">simple mode</a>.
 		</div>
 		{{end}}
-		<textarea id="code" name="code" {{if .Simple}}class="simple"{{end}}>{{printf "%s" .Snippet.Body |html}}</textarea>
+		<textarea id="code" name="code" {{if .Simple}}class="simple"{{end}} autocorrect="off" autocomplete="off" autocapitalize="off">{{printf "%s" .Snippet.Body |html}}</textarea>
 		<div id="output"></div>
 	</body>
 </html>
