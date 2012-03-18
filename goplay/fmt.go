@@ -7,6 +7,7 @@ package goplay
 import (
 	"bytes"
 	"encoding/json"
+	"go/ast"
 	"go/parser"
 	"go/printer"
 	"go/token"
@@ -39,6 +40,7 @@ func gofmt(body string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	ast.SortImports(fset, f)
 	var buf bytes.Buffer
 	err = printer.Fprint(&buf, fset, f)
 	if err != nil {
