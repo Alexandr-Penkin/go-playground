@@ -5,12 +5,12 @@
 package goplay
 
 import (
-	"appengine"
-	"appengine/urlfetch"
-	"bytes"
 	"fmt"
 	"io"
 	"net/http"
+
+	"appengine"
+	"appengine/urlfetch"
 )
 
 const runUrl = "http://golang.org/compile?output=json"
@@ -21,7 +21,6 @@ func init() {
 
 func compile(w http.ResponseWriter, r *http.Request) {
 	if err := passThru(w, r); err != nil {
-		appengine.NewContext(r).Errorf("Compile server error: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintln(w, "Compile server error.")
 	}
@@ -30,10 +29,8 @@ func compile(w http.ResponseWriter, r *http.Request) {
 func passThru(w io.Writer, req *http.Request) error {
 	c := appengine.NewContext(req)
 	client := urlfetch.Client(c)
-	// TODO(adg): pass the Body through verbatim once
-	// golang.org/compile uses a urlencoded key/value pair body.
-	buf := bytes.NewBufferString(req.FormValue("body"))
-	r, err := client.Post(runUrl, "text/plain", buf)
+	defer req.Body.Close()
+	r, err := client.Post(runUrl, req.Header.Get("Content-type"), req.Body)
 	if err != nil {
 		c.Errorf("making POST request:", err)
 		return err
