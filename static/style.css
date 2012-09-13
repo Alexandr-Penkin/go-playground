@@ -1,25 +1,40 @@
+html {
+	height: 100%;
+}
 body {
 	color: black;
+	padding: 0;
+	margin: 0;
+	width: 100%;
+	height: 100%;
 }
-textarea {
-	font-family: Menlo, monospace;
-	font-size: 12pt;
-	background: #FFD;
+#wrap {
+	padding: 5px;
+	margin: 0;
 
 	position: absolute;
 	top: 50px;
 	bottom: 25%;
 	left: 0;
 	right: 0;
-	padding: 5px;
+
+	background: #FFD;
+}
+#code, #output, pre {
+	font-family: Menlo, monospace;
+	font-size: 11pt;
+}
+#code {
+	background: inherit;
+
+	width: 100%;
+	height: 100%;
+	padding: 0; margin: 0;
 	border: none;
 	outline: none;
 	resize: none;
 }
 #output {
-	font-family: monospace;
-	font-size: 12pt;
-
 	position: absolute;
 	top: 75%;
 	bottom: 0;
@@ -36,21 +51,23 @@ textarea {
 #output pre {
 	margin: 0;
 }
-#head {
+#banner {
 	position: absolute;
 	left: 0;
 	right: 0;
 	top: 0;
 	height: 50px;
+}
+#head {
+	float: left;
+	padding: 8px;
+
 	font-size: 30px;
 	font-family: Georgia, serif;
-	padding: 8px;
 }
 #controls {
-	position: absolute;
-	left: 220px;
-	top: 9px;
-	height: 50px;
+	float: left; 
+	padding: 10px;
 }
 #controls input[type=button] {
 	height: 30px;
