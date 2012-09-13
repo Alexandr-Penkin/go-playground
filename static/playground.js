@@ -10,16 +10,10 @@
 // 	shareEl - share button element (optional)
 // 	shareURLEl - share URL text input element (optional)
 // 	shareRedirect - base URL to redirect to on share (optional)
-// 	preCompile - callback to mutate request data before compiling (optional)
-// 	postCompile - callback to read response data after compiling (optional)
-// 	simple - use plain textarea instead of CodeMirror. (optional)
-// 	toysEl - select element with a list of toys. (optional)
 function playground(opts) {
-	var simple = opts['simple'];
 	var code = $(opts['codeEl']);
-	var editor;
 
-	// autoindent helpers for simple mode.
+	// autoindent helpers.
 	function insertTabs(n) {
 		// find the selection start and end
 		var start = code[0].selectionStart;
@@ -54,7 +48,7 @@ function playground(opts) {
 	}
 
 	function keyHandler(e) {
-		if (simple && e.keyCode == 9) { // tab
+		if (e.keyCode == 9) { // tab
 			insertTabs(1);
 			e.preventDefault();
 			return false;
@@ -64,58 +58,19 @@ function playground(opts) {
 				run();
 				e.preventDefault();
 				return false;
-			} else if (simple) {
+			} else {
 				autoindent(e.target);
 			}
 		}
 		return true;
 	}
-	if (simple) {
-		code.unbind('keydown').bind('keydown', keyHandler);
-	} else {
-		editor = CodeMirror.fromTextArea(
-			code[0],
-			{
-				lineNumbers: true,
-				indentUnit: 8,
-				indentWithTabs: true,
-				onKeyEvent: function(editor, e) { keyHandler(e); }
-			}
-		);
-	}
+	code.unbind('keydown').bind('keydown', keyHandler);
 	var output = $(opts['outputEl']);
 
-	function clearErrors() {
-		if (!editor) {
-			return;
-		}
-		var lines = editor.lineCount();
-		for (var i = 0; i < lines; i++) {
-			editor.setLineClass(i, null);
-		}
-	}
-	function highlightErrors(text) {
-		if (!editor) {
-			return;
-		}
-		var errorRe = /[a-z]+\.go:([0-9]+):/g;
-		var result;
-		while ((result = errorRe.exec(text)) != null) {
-			var line = result[1]*1-1;
-			editor.setLineClass(line, "errLine")
-		}
-	}
 	function body() {
-		if (editor) {
-			return editor.getValue();
-		}
 		return $(opts['codeEl']).val();
 	}
 	function setBody(text) {
-		if (editor) {
-			editor.setValue(text);
-			return;
-		}
 		$(opts['codeEl']).val(text);
 	}
 	function origin(href) {
@@ -136,14 +91,10 @@ function playground(opts) {
 
 	var seq = 0;
 	function run() {
-		clearErrors();
 		loading();
 		seq++;
 		var cur = seq;
 		var data = {"body": body()};
-		if (opts['preCompile']) {
-			opts['preCompile'](data);
-		}
 		$.ajax("/compile", {
 			data: data,
 			type: "POST",
@@ -152,15 +103,11 @@ function playground(opts) {
 				if (seq != cur) {
 					return;
 				}
-				if (opts['postCompile']) {
-					opts['postCompile'](data);
-				}
 				if (!data) {
 					return;
 				}
 				if (data.compile_errors != "") {
 					setOutput(data.compile_errors, true);
-					highlightErrors(data.compile_errors);
 					return;
 				}
 				var out = ""+data.output;
@@ -192,27 +139,9 @@ function playground(opts) {
 			success: function(data) {
 				if (data.Error) {
 					setOutput(data.Error, true);
-					highlightErrors(data.Error);
 					return;
 				}
 				setBody(data.Body);
-				setOutput("", false);
-			}
-		});
-	});
-
-	$(opts['toysEl']).bind('change', function() {
-		var toy = $(this).val();
-		loading();
-		$.ajax("/doc/play/"+toy, {
-			processData: false,
-			type: "GET",
-			complete: function(xhr) {
-				if (xhr.status != 200) {
-					setOutput("Server error; try again.", true);
-					return;
-				}
-				setBody(xhr.responseText);
 				setOutput("", false);
 			}
 		});
@@ -248,6 +177,4 @@ function playground(opts) {
 			});
 		});
 	}
-
-	return editor;
 }

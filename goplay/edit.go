@@ -20,7 +20,6 @@ var editTemplate = template.Must(template.ParseFiles("goplay/edit.html"))
 
 type editData struct {
 	Snippet *Snippet
-	Simple  bool
 }
 
 func edit(w http.ResponseWriter, r *http.Request) {
@@ -38,8 +37,7 @@ func edit(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	simple := r.FormValue("simple") != ""
-	editTemplate.Execute(w, &editData{snip, simple})
+	editTemplate.Execute(w, &editData{snip})
 }
 
 const hello = `package main

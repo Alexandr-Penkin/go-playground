@@ -16,8 +16,7 @@
 				"runEl":      "#run",
 				"fmtEl":      "#fmt",
 				"shareEl":    "#share",
-				"shareURLEl": "#shareURL",
-				"simple":     {{.Simple}}
+				"shareURLEl": "#shareURL"
 			});
 		});
 		</script>
@@ -30,13 +29,7 @@
 			<input type="button" value="Share" id="share">
 			<input type="text" id="shareURL">
 		</div>
-		{{if .Simple}}{{else}}
-		<div class="switch">
-			Editor not working?<br/>
-			Switch to <a href="?simple=1">simple mode</a>.
-		</div>
-		{{end}}
-		<textarea itemprop="description" id="code" name="code" {{if .Simple}}class="simple"{{end}} autocorrect="off" autocomplete="off" autocapitalize="off">{{printf "%s" .Snippet.Body |html}}</textarea>
+		<textarea itemprop="description" id="code" name="code" class="simple" autocorrect="off" autocomplete="off" autocapitalize="off">{{printf "%s" .Snippet.Body |html}}</textarea>
 		<div id="output"></div>
 		<img itemprop="image" src="http://golang.org/doc/gopher/project.png" style="display:none">
 	</body>
