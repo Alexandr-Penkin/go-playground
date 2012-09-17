@@ -44,7 +44,7 @@ function playground(opts) {
 			}
 		}
 		setTimeout(function() {
-			insertTabs(tabs, 1);
+			insertTabs(tabs);
 		}, 1);
 	}
 
