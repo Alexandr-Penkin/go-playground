@@ -3,13 +3,14 @@
 // license that can be found in the LICENSE file.
 
 // opts is an object with these keys
-// 	codeEl - code editor element 
+// 	codeEl - code editor element
 // 	outputEl - program output element
-// 	runEl - run button element
+//	runEl - run button element
 // 	fmtEl - fmt button element (optional)
 // 	shareEl - share button element (optional)
 // 	shareURLEl - share URL text input element (optional)
 // 	shareRedirect - base URL to redirect to on share (optional)
+//	enableHistory - enable using HTML5 history API (optional)
 function playground(opts) {
 	var code = $(opts['codeEl']);
 
@@ -89,6 +90,38 @@ function playground(opts) {
 		$("<pre/>").text(text).appendTo(output);
 	}
 
+	var pushedEmpty = (window.location.pathname == "/");
+	function inputChanged() {
+		if (pushedEmpty) {
+			return;
+		}
+		pushedEmpty = true;
+
+		$(opts['shareURLEl']).hide();
+		window.history.pushState(null, "", "/");
+	}
+
+	function popState(e) {
+		if (e == null) {
+			return;
+		}
+
+		if (e && e.state && e.state.code) {
+			setBody(e.state.code);
+		}
+	}
+
+	var rewriteHistory = false;
+
+	if (window.history &&
+		window.history.pushState &&
+		window.addEventListener &&
+		opts['enableHistory']) {
+		rewriteHistory = true;
+		code[0].addEventListener('input', inputChanged);
+		window.addEventListener('popstate', popState)
+	}
+
 	var seq = 0;
 	function run() {
 		loading();
@@ -156,9 +189,10 @@ function playground(opts) {
 		$(opts['shareEl']).click(function() {
 			if (sharing) return;
 			sharing = true;
+			var sharingData = body();
 			$.ajax("/share", {
 				processData: false,
-				data: body(),
+				data: sharingData,
 				type: "POST",
 				complete: function(xhr) {
 					sharing = false;
@@ -170,8 +204,17 @@ function playground(opts) {
 						window.location = opts['shareRedirect'] + xhr.responseText;
 					}
 					if (shareURL) {
-						var url = origin(window.location) + "/p/" + xhr.responseText;
+						var path = "/p/" + xhr.responseText
+						var url = origin(window.location) + path;
 						shareURL.show().val(url).focus().select();
+
+						if (rewriteHistory) {
+							var historyData = {
+								"code": sharingData,
+							};
+							window.history.pushState(historyData, "", path);
+							pushedEmpty = false;
+						}
 					}
 				}
 			});
