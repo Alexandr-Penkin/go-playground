@@ -84,8 +84,14 @@ function playground(opts) {
 	}
 	function setOutput(text, error) {
 		output.empty();
+		$(".lineerror").removeClass("lineerror");
 		if (error) {
 			output.addClass("error");
+			var regex = /prog.go:([0-9]+)/g;
+			var r;
+			while (r = regex.exec(text)) {
+				$(".lines div").eq(r[1]-1).addClass("lineerror");
+			}
 		}
 		$("<pre/>").text(text).appendTo(output);
 	}

@@ -20,10 +20,11 @@ body {
 
 	background: #FFD;
 }
-#code, #output, pre {
-	font-family: Menlo, monospace;
+#code, #output, pre, .lines {
+	font-family: Menlo, Courier New, monospace;
 	font-size: 11pt;
 }
+
 #code {
 	background: inherit;
 
@@ -33,6 +34,8 @@ body {
 	border: none;
 	outline: none;
 	resize: none;
+	wrap: off;
+	float: right;
 }
 #output {
 	position: absolute;
@@ -86,4 +89,20 @@ body {
 	border: 1px solid #ccc;
 	background: #eee;
 	color: black;
+}
+
+.lines {
+	float: left;
+	overflow: hidden;
+	text-align: right;
+}
+
+.lines div {
+	padding-right: 5px;
+	color: lightgray;
+}
+
+.lineerror {
+	color: red;
+	background: #FDD;
 }
