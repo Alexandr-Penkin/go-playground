@@ -9,15 +9,29 @@
 		<script>
 		$(document).ready(function() {
 			playground({
-				"codeEl":     "#code",
-				"outputEl":   "#output",
-				"runEl":      "#run",
-				"fmtEl":      "#fmt",
-				"shareEl":    "#share",
-				"shareURLEl": "#shareURL",
-				"enableHistory": true
+				'codeEl':     '#code',
+				'outputEl':   '#output',
+				'runEl':      '#run',
+				'fmtEl':      '#fmt',
+				'shareEl':    '#share',
+				'shareURLEl': '#shareURL',
+				'enableHistory': true
 			});
-			$("#code").linedtextarea();
+			$('#code').linedtextarea();
+			var about = $('#about');
+			about.click(function(e) {
+				if ($(e.target).is('a')) {
+					return;
+				}
+				about.hide();
+			});
+			$('#aboutButton').click(function() {
+				if (about.is(':visible')) {
+					about.hide();
+					return;
+				}
+				about.show();
+			})
 		});
 		</script>
 	</head>
@@ -30,11 +44,57 @@
 				<input type="button" value="Share" id="share">
 				<input type="text" id="shareURL">
 			</div>
+			<div id="aboutControls">
+				<input type="button" value="About" id="aboutButton">
+			</div>
 		</div>
 		<div id="wrap">
 			<textarea itemprop="description" id="code" name="code" autocorrect="off" autocomplete="off" autocapitalize="off" spellcheck="false">{{printf "%s" .Snippet.Body |html}}</textarea>
 		</div>
 		<div id="output"></div>
 		<img itemprop="image" src="http://golang.org/doc/gopher/project.png" style="display:none">
+		<div id="about">
+<p><b>About the Playground</b></p>
+
+<p>
+The Go Playground is a web service that runs on
+<a href="http://golang.org/">golang.org</a>'s servers.
+The service receives a Go program, compiles, links, and
+runs the program inside a sandbox, then returns the output.
+</p>
+
+<p>
+There are limitations to the programs that can be run in the playground:
+</p>
+
+<ul>
+
+<li>
+The playground can use most of the standard library, with some
+exceptions; notably absent are network and file system access.
+Therefore, the only communication a playground program has to the
+outside world is by writing to standard output and standard error.
+</li>
+
+<li>
+In the playground the time is always 2009-11-10 23:00:00 UTC
+(determining the sigificance of this date is an exercise for the reader).
+Sleeping does not work.
+This makes it easier to cache programs by giving them deterministic output.
+</li>
+
+<li>
+There are also limits on execution time and on CPU and memory usage,
+and the program is restricted to running in a single thread
+(but may use many goroutines).
+</li>
+
+</ul>
+
+<p>
+The playground uses the latest stable release of Go.<br>
+To find the precise version, run <a href="/p/1VcPUlPk_3">this program</a>.
+</p>
+		</div>
 	</body>
 </html>
