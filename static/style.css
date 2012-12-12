@@ -128,3 +128,6 @@ input[type=button]:hover {
 	color: red;
 	background: #FDD;
 }
+.exit {
+	color: lightgray;
+}
