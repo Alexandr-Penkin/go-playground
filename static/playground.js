@@ -85,18 +85,32 @@ function playground(opts) {
 	}
 	var playbackTimeout;
 	function playback(pre, events) {
+		function show(msg) {
+			// ^L clears the screen.
+			var msgs = msg.split("\x0c");
+			if (msgs.length == 1) {
+				pre.text(pre.text() + msg);
+				return;
+			}
+			pre.text(msgs.pop());
+		}
 		function next() {
 			if (events.length == 0) {
-				var exit = $('\n<span class="exit"/>');
-				exit.text("Program exited.");
+				var exit = $('<span class="exit"/>');
+				exit.text("\nProgram exited.");
 				exit.appendTo(pre);
 				return;
 			}
 			var e = events.shift();
-			playbackTimeout = setTimeout(function() {
-				pre.text(pre.text() + e.Message);
+			if (e.Delay == 0) {
+				show(e.Message);
 				next();
-			}, e.Delay / 1000000);
+			} else {
+				playbackTimeout = setTimeout(function() {
+					show(e.Message);
+					next();
+				}, e.Delay / 1000000);
+			}
 		}
 		next();
 	}
