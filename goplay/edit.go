@@ -12,6 +12,8 @@ import (
 	"text/template"
 )
 
+const hostname = "play.golang.org"
+
 func init() {
 	http.HandleFunc("/", edit)
 }
@@ -23,6 +25,12 @@ type editData struct {
 }
 
 func edit(w http.ResponseWriter, r *http.Request) {
+	// Redirect foo.play.golang.org to play.golang.org.
+	if strings.HasSuffix(r.Host, "."+hostname) {
+		http.Redirect(w, r, "http://"+hostname, http.StatusFound)
+		return
+	}
+
 	snip := &Snippet{Body: []byte(hello)}
 	if strings.HasPrefix(r.URL.Path, "/p/") {
 		c := appengine.NewContext(r)
