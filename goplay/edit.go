@@ -35,6 +35,11 @@ func edit(w http.ResponseWriter, r *http.Request) {
 	if strings.HasPrefix(r.URL.Path, "/p/") {
 		c := appengine.NewContext(r)
 		id := r.URL.Path[3:]
+		serveText := false
+		if strings.HasSuffix(id, ".go") {
+			id = id[:len(id)-3]
+			serveText = true
+		}
 		key := datastore.NewKey(c, "Snippet", id, 0, nil)
 		err := datastore.Get(c, key, snip)
 		if err != nil {
@@ -42,6 +47,11 @@ func edit(w http.ResponseWriter, r *http.Request) {
 				c.Errorf("loading Snippet: %v", err)
 			}
 			http.Error(w, "Snippet not found", http.StatusNotFound)
+			return
+		}
+		if serveText {
+			w.Header().Set("Content-type", "text/plain")
+			w.Write(snip.Body)
 			return
 		}
 	}
