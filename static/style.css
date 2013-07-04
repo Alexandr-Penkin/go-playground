@@ -66,10 +66,10 @@ a {
 	right: 0;
 	padding: 8px;
 }
-#output .loading {
+#output .system, #output .loading {
 	color: #999;
 }
-#output.error {
+#output .stderr, #output .error {
 	color: #900;
 }
 #output pre {
