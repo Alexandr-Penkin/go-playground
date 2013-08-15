@@ -18,6 +18,8 @@
 				'enableHistory': true
 			});
 			$('#code').linedtextarea();
+			// Avoid line wrapping.
+			$('#code').attr('wrap', 'off');
 			var about = $('#about');
 			about.click(function(e) {
 				if ($(e.target).is('a')) {
