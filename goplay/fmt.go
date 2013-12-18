@@ -9,7 +9,7 @@ import (
 	"go/format"
 	"net/http"
 
-	"github.com/bradfitz/goimports/imports"
+	"code.google.com/p/go.tools/imports"
 )
 
 func init() {
