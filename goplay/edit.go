@@ -5,11 +5,12 @@
 package goplay
 
 import (
-	"appengine"
-	"appengine/datastore"
+	"html/template"
 	"net/http"
 	"strings"
-	"text/template"
+
+	"appengine"
+	"appengine/datastore"
 )
 
 const hostname = "play.golang.org"
